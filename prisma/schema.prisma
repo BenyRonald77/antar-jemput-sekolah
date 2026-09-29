@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Mobil {
+  id        Int      @id @default(autoincrement())
+  plat      String   @unique
+  sopir     String
+  kapasitas Int
+  rutes     Rute[]
+  absens    Absen[]
+  posisis   Posisi[]
+
+  @@map("mobil")
+}
+
+model Rute {
+  id       Int     @id @default(autoincrement())
+  mobil_id Int
+  nama     String
+  mobil    Mobil   @relation(fields: [mobil_id], references: [id])
+  titiks   Titik[]
+
+  @@map("rute")
+}
+
+model Titik {
+  id      Int     @id @default(autoincrement())
+  rute_id Int
+  urutan  Int
+  nama    String
+  jam     String
+  rute    Rute    @relation(fields: [rute_id], references: [id])
+  siswas  Siswa[]
+
+  @@map("titik")
+}
+
+model Siswa {
+  id           Int          @id @default(autoincrement())
+  nama         String
+  kelas        String
+  titik_id     Int
+  ortu_nama    String?
+  ortu_telepon String?
+  titik        Titik        @relation(fields: [titik_id], references: [id])
+  absens       Absen[]
+  notifikasis  Notifikasi[]
+
+  @@map("siswa")
+}
+
+model Absen {
+  id       Int    @id @default(autoincrement())
+  siswa_id Int
+  tanggal  String
+  jam_naik String?
+  jam_turun String?
+  mobil_id Int?
+  siswa    Siswa  @relation(fields: [siswa_id], references: [id])
+  mobil    Mobil? @relation(fields: [mobil_id], references: [id])
+
+  @@unique([siswa_id, tanggal])
+  @@map("absen")
+}
+
+model Posisi {
+  id       Int    @id @default(autoincrement())
+  mobil_id Int
+  lat      Float
+  lng      Float
+  waktu    String
+  mobil    Mobil  @relation(fields: [mobil_id], references: [id])
+
+  @@map("posisi")
+}
+
+model Notifikasi {
+  id       Int    @id @default(autoincrement())
+  siswa_id Int
+  tanggal  String
+  waktu    String
+  jenis    String
+  pesan    String
+  siswa    Siswa  @relation(fields: [siswa_id], references: [id])
+
+  @@map("notifikasi")
+}
