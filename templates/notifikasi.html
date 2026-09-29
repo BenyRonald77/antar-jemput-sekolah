@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Log Notifikasi ke Orang Tua</h2>
+<table id="tbl"><thead><tr><th>Waktu</th><th>Siswa</th><th>Ortu</th><th>Jenis</th><th>Pesan</th></tr></thead><tbody></tbody></table>
+{% endblock %}
+{% block scripts %}
+<script>
+(async () => {
+  const n = await api("/api/notifikasi");
+  el("tbl").querySelector("tbody").innerHTML = n.map(x =>
+    `<tr><td>${x.waktu}</td><td>${x.nama}</td><td>${x.ortu_nama} (${x.ortu_telepon})</td>
+     <td><span class="badge">${x.jenis}</span></td><td>${x.pesan}</td></tr>`).join("")
+    || '<tr><td colspan="5">Belum ada notifikasi.</td></tr>';
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Siswa</h2>
+<table id="tbl"><thead><tr><th>Nama</th><th>Kelas</th><th>Rute</th><th>Titik</th><th>Ortu</th></tr></thead><tbody></tbody></table>
+<h3>Tambah Siswa</h3>
+<form id="f">
+  <input name="nama" placeholder="Nama" required>
+  <input name="kelas" placeholder="Kelas" required>
+  <select name="titik_id" id="titik" required></select>
+  <input name="ortu_nama" placeholder="Nama orang tua">
+  <input name="ortu_telepon" placeholder="Telepon orang tua">
+  <button>Simpan</button>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+async function load() {
+  const t = await api("/api/titik");
+  el("titik").innerHTML = t.map(x => `<option value="${x.id}">${x.nama_rute} — ${x.nama} (${x.jam})</option>`).join("");
+  const s = await api("/api/siswa");
+  el("tbl").querySelector("tbody").innerHTML = s.map(x =>
+    `<tr><td>${x.nama}</td><td>${x.kelas}</td><td>${x.nama_rute}</td><td>${x.nama_titik}</td>
+     <td>${x.ortu_nama || "-"} (${x.ortu_telepon || "-"})</td></tr>`).join("");
+}
+el("f").onsubmit = async e => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(e.target));
+  d.titik_id = +d.titik_id;
+  const r = await post("/api/siswa", d);
+  if (!r.error) { e.target.reset(); load(); }
+};
+load();
+</script>
+{% endblock %}

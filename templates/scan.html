@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Scan Absen Naik / Turun</h2>
+<form id="f">
+  <select id="siswa" required></select>
+  <button type="button" onclick="scan('naik')">Scan Naik</button>
+  <button type="button" onclick="scan('turun')">Scan Turun</button>
+</form>
+<div id="hasil"></div>
+<h3>Absensi Hari Ini</h3>
+<table id="tbl"><thead><tr><th>Nama</th><th>Kelas</th><th>Mobil</th><th>Naik</th><th>Turun</th></tr></thead><tbody></tbody></table>
+{% endblock %}
+{% block scripts %}
+<script>
+async function load() {
+  const s = await api("/api/siswa");
+  el("siswa").innerHTML = s.map(x => `<option value="${x.id}">${x.nama} (${x.kelas})</option>`).join("");
+  const a = await api("/api/absen");
+  el("tbl").querySelector("tbody").innerHTML = a.map(x =>
+    `<tr><td>${x.nama}</td><td>${x.kelas}</td><td>${x.plat || "-"}</td>
+     <td>${x.jam_naik || "-"}</td><td>${x.jam_turun || "-"}</td></tr>`).join("")
+    || '<tr><td colspan="5">Belum ada absensi.</td></tr>';
+}
+async function scan(jenis) {
+  const r = await post(`/api/scan/${jenis}`, {siswa_id: +el("siswa").value});
+  if (r.error) return;
+  el("hasil").innerHTML = `<div class="alert ok">${r.siswa} — scan ${jenis}: <b>${r.jam_naik || r.jam_turun}</b>. Notifikasi ke ortu tercatat.</div>`;
+  load();
+}
+load();
+</script>
+{% endblock %}
